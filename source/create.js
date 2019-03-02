@@ -5,7 +5,7 @@ export default () => {
   let current = []
   let next = current
 
-  const prepareNext = () => {
+  const snapshot = () => {
     if (next === current) {
       next = current.slice()
     }
@@ -20,7 +20,9 @@ export default () => {
       }
 
       let subscribed = true
-      prepareNext()
+      
+      snapshot()
+      
       next.push(listener)
 
       return () => {
@@ -29,7 +31,8 @@ export default () => {
         }
 
         subscribed = false
-        prepareNext()
+        
+        snapshot()
 
         return next.splice(next.indexOf(listener), 1)
       }
