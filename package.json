@@ -1,6 +1,6 @@
 {
   "name": "enroll",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "safer subscriptions",
   "main": "build/enroll.cjs.js",
   "module": "build/enroll.esm.js",
@@ -20,11 +20,11 @@
   },
   "keywords": [
     "subscriptions",
-    "broadcast",
+    "subscribe",
     "publish",
+    "broadcast",
     "listener",
     "listeners",
-    "subscribe",
     "emit"
   ],
   "author": "rogerbf <roger@bergfa.lk> (http://bergfa.lk/)",
