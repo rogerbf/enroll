@@ -1,25 +1,19 @@
-let enroll
+import root from "../source/root"
 
-if (process.env.NODE_ENV === `development`) {
-  enroll = require(`../source`).default
-} else {
-  enroll = require(`../`)
-}
-
-describe(`enroll`, () => {
+describe(`root`, () => {
   it(`is a function`, () => {
-    expect(typeof enroll).toEqual(`function`)
+    expect(typeof root).toEqual(`function`)
   })
 
   it(`has the expected api`, () => {
-    const channel = enroll()
+    const channel = root()
 
     expect(typeof channel.subscribe).toEqual(`function`)
     expect(typeof channel.broadcast).toEqual(`function`)
   })
 
   it(`throws if listener is not a function`, () => {
-    const channel = enroll()
+    const channel = root()
 
     expect(() => channel.subscribe()).toThrow()
     expect(() => channel.subscribe(``)).toThrow()
@@ -30,7 +24,7 @@ describe(`enroll`, () => {
 
   // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L196
   it(`supports multiple subscriptions`, () => {
-    const channel = enroll()
+    const channel = root()
 
     const listenerA = jest.fn()
     const listenerB = jest.fn()
@@ -79,7 +73,7 @@ describe(`enroll`, () => {
 
   // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L243
   it(`only removes listener once when unsubscribe is called`, () => {
-    const channel = enroll()
+    const channel = root()
 
     const listenerA = jest.fn()
     const listenerB = jest.fn()
@@ -97,7 +91,7 @@ describe(`enroll`, () => {
 
   // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L259
   it(`only removes relevant listener when unsubscribe is called`, () => {
-    const channel = enroll()
+    const channel = root()
 
     const listener = jest.fn()
 
@@ -113,7 +107,7 @@ describe(`enroll`, () => {
 
   // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L273
   it(`supports removing a subscription within a subscription`, () => {
-    const channel = enroll()
+    const channel = root()
 
     const listenerA = jest.fn()
     const listenerB = jest.fn()
@@ -136,7 +130,7 @@ describe(`enroll`, () => {
 
   // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L294
   it(`notifies all subscribers about current broadcast regardless if any of them gets unsubscribed in the process`, () => {
-    const channel = enroll()
+    const channel = root()
 
     const unsubscribeHandles = []
     const doUnsubscribeAll = () =>
@@ -168,7 +162,7 @@ describe(`enroll`, () => {
 
   // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L325
   it(`notifies only subscribers active at the moment of current broadcast`, () => {
-    const channel = enroll()
+    const channel = root()
 
     const listener1 = jest.fn()
     const listener2 = jest.fn()
@@ -201,7 +195,7 @@ describe(`enroll`, () => {
 
   // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L357
   it(`uses the last snapshot of subscribers during nested broadcast`, () => {
-    const channel = enroll()
+    const channel = root()
 
     const listener1 = jest.fn()
     const listener2 = jest.fn()
@@ -244,7 +238,7 @@ describe(`enroll`, () => {
 
   // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L413
   it(`does not leak private listeners array`, done => {
-    const channel = enroll()
+    const channel = root()
 
     channel.subscribe(function() {
       expect(this).toBe(undefined)

@@ -1,6 +1,6 @@
-const enroll = require(`../`)
+const { root } = require(`../`)
 
-const channel = enroll()
+const channel = root()
 
 const unsubscribe = channel.subscribe(console.log)
 
