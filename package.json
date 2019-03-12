@@ -1,6 +1,6 @@
 {
   "name": "enroll",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "safer subscriptions",
   "main": "build/enroll.cjs.js",
   "module": "build/enroll.esm.js",
@@ -33,9 +33,9 @@
     "@babel/core": "7.3.4",
     "@babel/plugin-transform-modules-commonjs": "7.2.0",
     "@babel/preset-env": "7.3.4",
-    "babel-jest": "24.3.1",
+    "babel-jest": "24.5.0",
     "eslint": "5.15.1",
-    "jest": "24.3.1",
+    "jest": "24.5.0",
     "rimraf": "2.6.3",
     "rollup": "1.6.0",
     "rollup-plugin-babel": "4.3.2",
@@ -46,8 +46,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "call-tree": "1.2.0",
-    "simple-difference": "1.0.1"
+    "call-tree": "2.0.0"
   },
   "repository": {
     "type": "git",
