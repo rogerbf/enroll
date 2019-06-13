@@ -10,13 +10,14 @@
   ],
   "scripts": {
     "clean": "rimraf build coverage",
-    "prepare": "npm run clean && npm test",
+    "prepare": "npm run lint && npm run clean && npm test",
     "build": "rollup -c",
     "pretest": "npm run build",
     "test": "jest",
     "test:development": "NODE_ENV=development jest",
     "develop": "npm run test:development -- --watch",
-    "coverage": "npm run test:development -- --coverage"
+    "coverage": "npm run test:development -- --coverage",
+    "lint": "eslint --fix . && echo 'Done linting.'"
   },
   "keywords": [
     "subscriptions",
@@ -30,23 +31,26 @@
   "author": "rogerbf <roger@bergfa.lk> (http://bergfa.lk/)",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "7.3.4",
-    "@babel/plugin-transform-modules-commonjs": "7.2.0",
-    "@babel/preset-env": "7.3.4",
-    "babel-jest": "24.5.0",
-    "eslint": "5.15.1",
-    "jest": "24.5.0",
+    "@babel/core": "7.4.5",
+    "@babel/plugin-transform-modules-commonjs": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "babel-jest": "24.8.0",
+    "eslint": "5.16.0",
+    "eslint-config-prettier": "4.3.0",
+    "eslint-plugin-prettier": "3.1.0",
+    "jest": "24.8.0",
+    "prettier": "1.18.2",
     "rimraf": "2.6.3",
-    "rollup": "1.6.0",
+    "rollup": "1.15.2",
     "rollup-plugin-babel": "4.3.2",
-    "rollup-plugin-commonjs": "9.2.1",
-    "rollup-plugin-node-resolve": "4.0.1"
+    "rollup-plugin-commonjs": "10.0.0",
+    "rollup-plugin-node-resolve": "5.0.2"
   },
   "directories": {
     "test": "tests"
   },
   "dependencies": {
-    "call-tree": "2.0.0"
+    "call-tree": "2.2.0"
   },
   "repository": {
     "type": "git",
