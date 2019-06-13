@@ -16,7 +16,7 @@ export default () => {
     const listenerType = toString(listener)
 
     if (listenerType !== FUNCTION) {
-      throw new Error(`Expected ${ FUNCTION }, received ${ listenerType }.`)
+      throw new Error(`Expected ${FUNCTION}, received ${listenerType}.`)
     }
 
     let subscribed = true

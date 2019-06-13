@@ -270,11 +270,11 @@ describe(`tree`, () => {
     broadcast({ a: `a` })
 
     expect(listener.mock.calls.length).toBe(1)
-    expect(listener.mock.calls[0]).toEqual([ `a` ])
+    expect(listener.mock.calls[0]).toEqual([`a`])
 
     channel.broadcast({ a: `a`, b: `b` })
     expect(listener.mock.calls.length).toBe(3)
-    expect(listener.mock.calls[1]).toEqual([ `a` ])
-    expect(listener.mock.calls[2]).toEqual([ `b` ])
+    expect(listener.mock.calls[1]).toEqual([`a`])
+    expect(listener.mock.calls[2]).toEqual([`b`])
   })
 })
