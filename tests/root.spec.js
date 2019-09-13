@@ -247,4 +247,32 @@ describe(`root`, () => {
 
     channel.broadcast()
   })
+
+  it(`calls initial broadcast function once when subscribing`, () => {
+    const returnValue = {}
+    const initialBroadcast = jest.fn(() => returnValue)
+    const channel = root(initialBroadcast)
+    const receiver = jest.fn()
+    const unsubscribe = channel.subscribe(receiver)
+
+    expect(initialBroadcast).toHaveBeenCalled()
+    expect(receiver).toHaveBeenCalledWith(returnValue)
+
+    channel.broadcast(1)
+
+    expect(receiver).toHaveBeenCalledWith(1)
+
+    unsubscribe()
+    channel.broadcast(2)
+
+    expect(receiver).not.toHaveBeenNthCalledWith(3, 2)
+    expect(receiver).not.toHaveBeenNthCalledWith(3, returnValue)
+  })
+
+  it(`throws when initial broadcast value is not a function`, () => {
+    expect(() => root("")).toThrow()
+    expect(() => root(1)).toThrow()
+    expect(() => root({})).toThrow()
+    expect(() => root([])).toThrow()
+  })
 })

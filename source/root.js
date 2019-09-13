@@ -2,7 +2,18 @@ const toString = value => Object.prototype.toString.call(value)
 
 const FUNCTION = toString(Function)
 
-export default () => {
+export default getInitialBroadcast => {
+  if (
+    getInitialBroadcast !== undefined &&
+    toString(getInitialBroadcast) !== FUNCTION
+  ) {
+    throw new TypeError(
+      `Expected argument of type ${FUNCTION} got ${toString(
+        getInitialBroadcast
+      )}`
+    )
+  }
+
   let current = []
   let next = current
 
@@ -24,6 +35,8 @@ export default () => {
     snapshot()
 
     next.push(listener)
+
+    getInitialBroadcast && listener(getInitialBroadcast())
 
     return () => {
       if (!subscribed) {
