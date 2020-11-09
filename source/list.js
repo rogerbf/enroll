@@ -1,14 +1,13 @@
-const toString = value => Object.prototype.toString.call(value)
+import { toString } from "./to-string"
+import { FUNCTION } from "./types.js"
 
-const FUNCTION = toString(Function)
-
-export default getInitialBroadcast => {
+export const list = (getInitialBroadcast) => {
   if (
     getInitialBroadcast !== undefined &&
     toString(getInitialBroadcast) !== FUNCTION
   ) {
     throw new TypeError(
-      `Expected argument of type ${FUNCTION} got ${toString(
+      `Expected argument of type ${FUNCTION}, got ${toString(
         getInitialBroadcast
       )}`
     )
@@ -23,11 +22,11 @@ export default getInitialBroadcast => {
     }
   }
 
-  const subscribe = listener => {
+  const subscribe = (listener) => {
     const listenerType = toString(listener)
 
     if (listenerType !== FUNCTION) {
-      throw new Error(`Expected ${FUNCTION}, received ${listenerType}.`)
+      throw new TypeError(`Expected ${FUNCTION}, got ${listenerType}.`)
     }
 
     let subscribed = true
@@ -54,11 +53,21 @@ export default getInitialBroadcast => {
   const broadcast = (...args) => {
     current = next
 
-    current.forEach(listener => listener(...args))
+    current.forEach((listener) => listener(...args))
   }
 
-  return {
-    subscribe,
-    broadcast,
-  }
+  return Object.defineProperty(
+    {
+      subscribe,
+      broadcast,
+    },
+    "current",
+    {
+      get() {
+        snapshot()
+
+        return [...next]
+      },
+    }
+  )
 }

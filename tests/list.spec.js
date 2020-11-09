@@ -1,58 +1,57 @@
 const test = require("ava")
 const sinon = require("sinon")
-const { tree } = require("../source/tree.js")
+const { list } = require("../source/list.js")
 
 test("it is a function", (t) => {
-  t.is(typeof tree, "function")
+  t.is(typeof list, "function")
 })
 
 test("there is a subscribe method", (t) => {
-  const channel = tree()
+  const channel = list()
 
   t.is(typeof channel.subscribe, "function")
 })
 
 test("there is a broadcast method", (t) => {
-  const channel = tree()
+  const channel = list()
 
   t.is(typeof channel.broadcast, "function")
 })
 
-test("it throws if listener is not an object", (t) => {
-  const channel = tree()
+test("subscribe throws if listener is not a function", (t) => {
+  const channel = list()
 
   t.throws(() => channel.subscribe())
   t.throws(() => channel.subscribe(""))
   t.throws(() => channel.subscribe(0))
   t.throws(() => channel.subscribe([]))
-  t.throws(() => channel.subscribe(() => {}))
+  t.throws(() => channel.subscribe({}))
 })
 
 // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L196
 test("it supports multiple subscriptions", (t) => {
-  const channel = tree()
-
+  const channel = list()
   const listenerA = sinon.fake()
   const listenerB = sinon.fake()
 
-  let unsubscribeListenerA = channel.subscribe({ a: listenerA })
+  let unsubscribeListenerA = channel.subscribe(listenerA)
 
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
 
   t.true(listenerA.calledOnce)
   t.true(listenerB.notCalled)
 
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
 
   t.true(listenerA.calledTwice)
   t.true(listenerB.notCalled)
 
-  const unsubscribeListenerB = channel.subscribe({ b: listenerB })
+  const unsubscribeListenerB = channel.subscribe(listenerB)
 
   t.true(listenerA.calledTwice)
   t.true(listenerB.notCalled)
 
-  channel.broadcast({ a: "a", b: "b" })
+  channel.broadcast()
 
   t.true(listenerA.calledThrice)
   t.true(listenerB.calledOnce)
@@ -62,7 +61,7 @@ test("it supports multiple subscriptions", (t) => {
   t.true(listenerA.calledThrice)
   t.true(listenerB.calledOnce)
 
-  channel.broadcast({ a: "a", b: "b" })
+  channel.broadcast()
 
   t.true(listenerA.calledThrice)
   t.true(listenerB.calledTwice)
@@ -72,17 +71,17 @@ test("it supports multiple subscriptions", (t) => {
   t.true(listenerA.calledThrice)
   t.true(listenerB.calledTwice)
 
-  channel.broadcast({ a: "a", b: "b" })
+  channel.broadcast()
 
   t.true(listenerA.calledThrice)
   t.true(listenerB.calledTwice)
 
-  unsubscribeListenerA = channel.subscribe({ a: listenerA })
+  unsubscribeListenerA = channel.subscribe(listenerA)
 
   t.true(listenerA.calledThrice)
   t.true(listenerB.calledTwice)
 
-  channel.broadcast({ a: "a", b: "b" })
+  channel.broadcast()
 
   t.is(listenerA.callCount, 4)
   t.true(listenerB.calledTwice)
@@ -90,70 +89,59 @@ test("it supports multiple subscriptions", (t) => {
 
 // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L243
 test("it only removes listener once when unsubscribe is called", (t) => {
-  const channel = tree()
+  const channel = list()
 
   const listenerA = sinon.fake()
   const listenerB = sinon.fake()
 
-  const unsubscribeListenerA = channel.subscribe({ a: listenerA })
+  const unsubscribeListenerA = channel.subscribe(listenerA)
+  channel.subscribe(listenerB)
 
-  channel.subscribe({ b: listenerB })
+  unsubscribeListenerA()
+  unsubscribeListenerA()
 
-  t.deepEqual(unsubscribeListenerA(), { a: listenerA })
-  t.is(unsubscribeListenerA(), undefined)
-
-  channel.broadcast({ b: "b" })
+  channel.broadcast()
 
   t.true(listenerA.notCalled)
   t.true(listenerB.calledOnce)
 })
 
-test("the same listener can only be added once to the same path", (t) => {
-  const channel = tree()
-
+// https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L259
+test("it only removes the relevant listener when unsubscribe is called", (t) => {
+  const channel = list()
   const listener = sinon.fake()
 
-  const unsubscribeFirst = channel.subscribe({ a: listener })
-  const unsubscribeSecond = channel.subscribe({ a: listener })
+  channel.subscribe(listener)
 
-  channel.broadcast({ a: "a" })
-
-  t.true(listener.calledOnce)
-
-  unsubscribeFirst()
-
-  channel.broadcast({ a: "a" })
-
-  t.true(listener.calledOnce)
+  const unsubscribeSecond = channel.subscribe(listener)
 
   unsubscribeSecond()
+  unsubscribeSecond()
 
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
 
   t.true(listener.calledOnce)
 })
 
 // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L273
 test("it supports removing a subscription within a subscription", (t) => {
-  const channel = tree()
+  const channel = list()
 
   const listenerA = sinon.fake()
   const listenerB = sinon.fake()
   const listenerC = sinon.fake()
 
-  channel.subscribe({ a: listenerA })
+  channel.subscribe(listenerA)
 
-  const unsubscribeListenerB = channel.subscribe({
-    a: () => {
-      listenerB()
-      unsubscribeListenerB()
-    },
+  const unsubscribeListenerB = channel.subscribe(() => {
+    listenerB()
+    unsubscribeListenerB()
   })
 
-  channel.subscribe({ a: listenerC })
+  channel.subscribe(listenerC)
 
-  channel.broadcast({ a: "a" })
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
+  channel.broadcast()
 
   t.true(listenerA.calledTwice)
   t.true(listenerB.calledOnce)
@@ -161,9 +149,8 @@ test("it supports removing a subscription within a subscription", (t) => {
 })
 
 // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L294
-test("it notifies all subscribers about current broadcast regardless if any of them gets unsubscribed in the process", (t) => {
-  const channel = tree()
-
+test("notifies all subscribers about current broadcast regardless if any of them gets unsubscribed in the process", (t) => {
+  const channel = list()
   const unsubscribeHandles = []
 
   const unsubscribeAll = () =>
@@ -173,20 +160,18 @@ test("it notifies all subscribers about current broadcast regardless if any of t
   const listenerB = sinon.fake()
   const listenerC = sinon.fake()
 
-  unsubscribeHandles.push(channel.subscribe({ a: () => listenerA() }))
+  unsubscribeHandles.push(channel.subscribe(() => listenerA()))
 
   unsubscribeHandles.push(
-    channel.subscribe({
-      a: () => {
-        listenerB()
-        unsubscribeAll()
-      },
+    channel.subscribe(() => {
+      listenerB()
+      unsubscribeAll()
     })
   )
 
-  unsubscribeHandles.push(channel.subscribe({ a: () => listenerC() }))
+  unsubscribeHandles.push(channel.subscribe(() => listenerC()))
 
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
 
   t.true(listenerA.calledOnce)
   t.true(listenerB.calledOnce)
@@ -200,38 +185,36 @@ test("it notifies all subscribers about current broadcast regardless if any of t
 })
 
 // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L325
-test("it notifies only subscribers active at the moment of current broadcast", (t) => {
-  const channel = tree()
+test("it only notifies active listeners at the moment of current broadcast", (t) => {
+  const channel = list()
 
   const listenerA = sinon.fake()
   const listenerB = sinon.fake()
   const listenerC = sinon.fake()
 
-  let listenerCAdded = false
+  let addedListenerC = false
 
   const maybeAddListenerC = () => {
-    if (!listenerCAdded) {
-      listenerCAdded = true
-      channel.subscribe({ a: () => listenerC() })
+    if (!addedListenerC) {
+      addedListenerC = true
+      channel.subscribe(() => listenerC())
     }
   }
 
-  channel.subscribe({ a: () => listenerA() })
+  channel.subscribe(() => listenerA())
 
-  channel.subscribe({
-    a: () => {
-      listenerB()
-      maybeAddListenerC()
-    },
+  channel.subscribe(() => {
+    listenerB()
+    maybeAddListenerC()
   })
 
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
 
   t.true(listenerA.calledOnce)
   t.true(listenerB.calledOnce)
   t.true(listenerC.notCalled)
 
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
 
   t.true(listenerA.calledTwice)
   t.true(listenerB.calledTwice)
@@ -239,51 +222,49 @@ test("it notifies only subscribers active at the moment of current broadcast", (
 })
 
 // https://github.com/reduxjs/redux/blob/792ac5ae541a7c0792908df8f4e2da334184e74f/test/createStore.spec.js#L357
-test("it uses the last snapshot of subscribers during nested broadcast", (t) => {
-  const channel = tree()
+test("it uses the last snapshot of subscriptions during nested broadcast", (t) => {
+  const channel = list()
 
   const listenerA = sinon.fake()
   const listenerB = sinon.fake()
   const listenerC = sinon.fake()
   const listenerD = sinon.fake()
 
-  let unsubscribeListenerC
+  let unsubscribeListenerD
 
-  const unsubscribeListenerA = channel.subscribe({
-    a: () => {
-      listenerA()
+  const unsubscribeListenerA = channel.subscribe(() => {
+    listenerA()
 
-      t.true(listenerA.calledOnce)
-      t.true(listenerB.notCalled)
-      t.true(listenerC.notCalled)
-      t.true(listenerD.notCalled)
+    t.true(listenerA.calledOnce)
+    t.true(listenerB.notCalled)
+    t.true(listenerC.notCalled)
+    t.true(listenerD.notCalled)
 
-      unsubscribeListenerA()
+    unsubscribeListenerA()
 
-      unsubscribeListenerC = channel.subscribe({ a: listenerD })
+    unsubscribeListenerD = channel.subscribe(listenerD)
 
-      channel.broadcast({ a: "a" })
+    channel.broadcast()
 
-      t.true(listenerA.calledOnce)
-      t.true(listenerB.calledOnce)
-      t.true(listenerC.calledOnce)
-      t.true(listenerD.calledOnce)
-    },
+    t.true(listenerA.calledOnce)
+    t.true(listenerB.calledOnce)
+    t.true(listenerC.calledOnce)
+    t.true(listenerD.calledOnce)
   })
 
-  channel.subscribe({ a: listenerB })
-  channel.subscribe({ a: listenerC })
+  channel.subscribe(listenerB)
+  channel.subscribe(listenerC)
 
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
 
   t.true(listenerA.calledOnce)
   t.true(listenerB.calledTwice)
   t.true(listenerC.calledTwice)
   t.true(listenerD.calledOnce)
 
-  unsubscribeListenerC()
+  unsubscribeListenerD()
 
-  channel.broadcast({ a: "a" })
+  channel.broadcast()
 
   t.true(listenerA.calledOnce)
   t.true(listenerB.calledThrice)
@@ -293,63 +274,63 @@ test("it uses the last snapshot of subscribers during nested broadcast", (t) => 
 
 test("it gets the initial broadcast once when subscribing", (t) => {
   const getInitialBroadcast = sinon.fake(() => 1)
-  const channel = tree(getInitialBroadcast)
-  const listener = { a: sinon.fake() }
+  const channel = list(getInitialBroadcast)
+  const listener = sinon.fake()
   const unsubscribe = channel.subscribe(listener)
 
   t.true(getInitialBroadcast.calledOnce)
-  t.true(listener.a.calledOnceWithExactly(1))
+  t.true(listener.calledOnceWithExactly(1))
 
-  channel.broadcast({ a: 2 })
+  channel.broadcast(2)
 
-  t.true(listener.a.calledTwice)
+  t.true(listener.calledTwice)
 
   t.deepEqual(
-    listener.a.getCalls().map(({ args }) => args),
+    listener.getCalls().map(({ args }) => args),
     [[1], [2]]
   )
 
   unsubscribe()
 
-  channel.broadcast({ a: 3 })
+  channel.broadcast(3)
 
-  t.true(listener.a.calledTwice)
+  t.true(listener.calledTwice)
 })
 
-test("it throws an error if getInitialBroadcast is not a function", (t) => {
-  t.throws(() => tree(""))
-  t.throws(() => tree(1))
-  t.throws(() => tree({}))
-  t.throws(() => tree([]))
+test("it throws when initial broadcast value is not a function", (t) => {
+  t.throws(() => list(""))
+  t.throws(() => list(1))
+  t.throws(() => list({}))
+  t.throws(() => list([]))
 })
 
 test("it returns the current subscribers via the .current property", (t) => {
   const listenerA = sinon.fake()
   const listenerB = sinon.fake()
 
-  const channel = tree()
+  const channel = list()
 
-  const unsubscribeListenerA = channel.subscribe({ a: listenerA })
+  const unsubscribeListenerA = channel.subscribe(listenerA)
 
-  t.deepEqual(channel.current, { a: listenerA })
+  t.deepEqual(channel.current, [listenerA])
 
-  channel.subscribe({ a: listenerB })
+  channel.subscribe(listenerB)
 
-  t.deepEqual(channel.current, { a: [listenerA, listenerB] })
+  t.deepEqual(channel.current, [listenerA, listenerB])
 
   unsubscribeListenerA()
 
-  t.deepEqual(channel.current, { a: listenerB })
+  t.deepEqual(channel.current, [listenerB])
 })
 
 test("internal listeners array cannot be mutated via '.current'", (t) => {
   const listenerA = sinon.fake()
 
-  const channel = tree()
+  const channel = list()
 
-  channel.subscribe({ a: listenerA })
+  channel.subscribe(listenerA)
 
-  delete channel.current.a
+  channel.current.splice(0, 1)
 
-  t.deepEqual(channel.current, { a: listenerA })
+  t.deepEqual(channel.current, [listenerA])
 })

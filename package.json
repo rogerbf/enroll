@@ -1,23 +1,21 @@
 {
   "name": "enroll",
-  "version": "3.2.0",
-  "description": "safer subscriptions",
-  "main": "build/enroll.cjs.js",
-  "module": "build/enroll.esm.js",
-  "browser": "build/enroll.umd.js",
+  "version": "4.0.0",
+  "description": "list/tree based subscriptions",
+  "main": "index.js",
+  "module": "source/index.js",
   "files": [
-    "build"
+    "index.js",
+    "source"
   ],
   "scripts": {
-    "clean": "rimraf build coverage",
-    "prepare": "npm run lint && npm run clean && npm test",
-    "build": "rollup -c",
-    "pretest": "npm run build",
-    "test": "jest",
-    "test:development": "NODE_ENV=development jest",
-    "develop": "npm run test:development -- --watch",
-    "coverage": "npm run test:development -- --coverage",
-    "lint": "eslint --fix . && echo 'Done linting.'"
+    "lint": "eslint --fix .",
+    "format": "prettier --write '**/*.js'",
+    "pretest": "npm run format && npm run lint",
+    "test": "ava",
+    "coverage": "c8 --reporter=html --reporter=text --exclude tests npm run test",
+    "develop": "ava --watch",
+    "prepare": "npm run test"
   },
   "keywords": [
     "subscriptions",
@@ -26,35 +24,39 @@
     "broadcast",
     "listener",
     "listeners",
-    "emit"
+    "emit",
+    "tree",
+    "object",
+    "list",
+    "pubsub",
+    "pub",
+    "sub"
   ],
   "author": "rogerbf <roger@bergfa.lk> (http://bergfa.lk/)",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "7.6.0",
-    "@babel/plugin-transform-modules-commonjs": "7.6.0",
-    "@babel/preset-env": "7.6.0",
-    "babel-jest": "24.9.0",
-    "eslint": "6.3.0",
-    "eslint-config-prettier": "6.3.0",
-    "eslint-plugin-prettier": "3.1.0",
-    "jest": "24.9.0",
-    "prettier": "1.18.2",
-    "rimraf": "3.0.0",
-    "rollup": "1.21.2",
-    "rollup-plugin-babel": "4.3.3",
-    "rollup-plugin-commonjs": "10.1.0",
-    "rollup-plugin-node-resolve": "5.2.0"
-  },
-  "directories": {
-    "test": "tests"
+    "ava": "3.13.0",
+    "c8": "7.3.5",
+    "eslint": "7.13.0",
+    "prettier": "2.1.2",
+    "sinon": "9.2.1"
   },
   "dependencies": {
-    "call-tree": "2.2.1"
+    "call-tree": "3.0.0",
+    "esm": "3.2.25"
+  },
+  "directories": {
+    "example": "examples",
+    "test": "tests"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rogerbf/enroll.git"
   },
-  "homepage": "https://github.com/rogerbf/enroll#readme"
+  "homepage": "https://github.com/rogerbf/enroll#readme",
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  }
 }
